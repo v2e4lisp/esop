@@ -97,19 +97,30 @@
 
 
 ;; 1.24
-(define every? 
+(define every?
   (lambda (pred lst)
     (if (null? lst) #t
         (and (pred (car lst)) (every? pred (cdr lst))))))
 
 ;; 1.25
-(define exists? 
+(define exists?
   ;; any
   (lambda (pred lst)
     (if (null? lst) #f
         (or (pred (car lst)) (exists? pred (cdr lst))))))
 
+
 ;; 1.26
+(define up
+  (lambda (lst)
+    (cond
+     ((null? lst) ())
+     ((list? (car lst))
+      (append (car lst) (up (cdr lst))))
+     (else (cons (car lst) (up (cdr lst)))))))
+
+
+;; 1.27
 (define flatten
   (lambda (lst)
     (if (null? lst) ()
@@ -120,4 +131,112 @@
             (else (list elem)))
            (flatten (cdr lst)))))))
 
+
+;; 1.28
+(define merge/predicate
+  (lambda (pred lst1 lst2)
+    (cond
+     ((null? lst1) lst2)
+     ((null? lst2) lst1)
+     ((pred (car lst1) (car lst2))
+      (cons (car lst1)
+            (merge/predicate pred (cdr lst1) lst2)))
+     (else
+      (cons (car lst2)
+            (merge/predicate pred lst1 (cdr lst2)))))))
+
+(define merge
+  (lambda (lst1 lst2)
+    (merge/predicate < lst1 lst2)))
+
+
+;; 1.29
+(define sort
+  (lambda (lst)
+    (if (null? lst) ()
+        (merge (list (car lst))
+               (sort (cdr lst))))))
+
+
+;; 1.30
+(define sort/predicate
+  (lambda (pred lst)
+    (if (null? lst) ()
+        (merge/predicate pred
+                         (list (car lst))
+                         (sort/predicate pred (cdr lst))))))
+
+;; 1.31
+(define interior-node
+  (lambda (name lson rson)
+    (list name lson rson)))
+
+(define interior-node-name
+  (lambda (node)
+    (car node)))
+
+(define leaf
+  (lambda (value)
+    value))
+
+(define leaf?
+  (lambda (node)
+    (integer? node)))
+
+(define lson
+  (lambda (node)
+    (car (contents-of node))))
+
+(define rson
+  (lambda (node)
+    (cadr (contents-of node))))
+
+(define contents-of
+  (lambda (node)
+    (if (leaf? node)
+        node
+        (cdr node))))
+
+;; 1.32
+(define double
+  (lambda (num)
+    (* 2 num)))
+
+(define double-tree
+  (lambda (node)
+    (if (leaf? node)
+        (leaf (double (contents-of node)))
+        (interior-node
+         (interior-node-name node)
+         (double-tree (lson node))
+         (double-tree (rson node))))))
+
+
+;; 1.33
+(define mark-leaves-with-red-depth
+  (lambda (node)
+    (if (leaf? node)
+        (contents-of node)
+        (list
+         (interior-node-name node)
+         (mark-leaves-with-red-depth (lson node))
+         (mark-leaves-with-red-depth (rson node))))))
+
+
+;; 1.34
+(define partial-path
+  (lambda (plst target lst)
+    (cond
+     ((null? lst) #f)
+     ((= target (interior-node-name lst)) plst)
+     (else
+      (or
+       (partial-path (append plst '(left)) target (lson lst))
+       (partial-path (append plst '(right)) target (rson lst)))))))
+
+(define path
+  (lambda (target lst)
+    (partial-path () target lst)))
+
+;; 1.35
 
