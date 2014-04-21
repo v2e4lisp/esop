@@ -1,3 +1,8 @@
+;; helpers
+(define inc
+  (lambda (n)
+    (+ 1 n)))
+
 ;; 1.15
 (define duple
   (lambda (n x)
@@ -212,15 +217,22 @@
          (double-tree (rson node))))))
 
 
-;; 1.33 [TODO]
+;; 1.33
+(define partial-mark-leaves-with-red-depth
+  (lambda (num node)
+    (if (leaf? node)
+        (leaf num)
+        (let ((n (if (eqv? 'red (interior-node-name node))
+                     (inc num)
+                     num)))
+          (interior-node
+           (interior-node-name node)
+           (partial-mark-leaves-with-red-depth n (lson node))
+           (partial-mark-leaves-with-red-depth n (rson node)))))))
+
 (define mark-leaves-with-red-depth
   (lambda (node)
-    (if (leaf? node)
-        (contents-of node)
-        (list
-         (interior-node-name node)
-         (mark-leaves-with-red-depth (lson node))
-         (mark-leaves-with-red-depth (rson node))))))
+    (partial-mark-leaves-with-red-depth 0 node)))
 
 ;; test
 (mark-leaves-with-red-depth
@@ -256,9 +268,7 @@
                       (31 () ()))))
 
 ;; 1.35
-(define inc
-  (lambda (n)
-    (+ 1 n)))
+
 
 (define count-leaf
   (lambda (node)
