@@ -212,7 +212,7 @@
          (double-tree (rson node))))))
 
 
-;; 1.33
+;; 1.33 [TODO]
 (define mark-leaves-with-red-depth
   (lambda (node)
     (if (leaf? node)
@@ -221,6 +221,18 @@
          (interior-node-name node)
          (mark-leaves-with-red-depth (lson node))
          (mark-leaves-with-red-depth (rson node))))))
+
+;; test
+(mark-leaves-with-red-depth
+ (interior-node 'red
+  (interior-node 'bar
+   (leaf 26)
+   (leaf 12))
+  (interior-node 'red
+   (leaf 11)
+   (interior-node 'quux
+    (leaf 117)
+    (leaf 14)))))
 
 
 ;; 1.34
@@ -238,5 +250,46 @@
   (lambda (target lst)
     (partial-path () target lst)))
 
+;; test
+(path 17 '(14 (7 () (12 () ())) (26 (20 (17 () ())
+                          ())
+                      (31 () ()))))
+
 ;; 1.35
+(define inc
+  (lambda (n)
+    (+ 1 n)))
+
+(define count-leaf
+  (lambda (node)
+    (if (leaf? node) 1
+        (+ (count-leaf (lson node))
+           (count-leaf (rson node))))))
+
+(define partial-number-leaves
+  (lambda (num node)
+    (if (leaf? node)
+        (leaf  num)
+    (interior-node
+     (interior-node-name node)
+     (partial-number-leaves num (lson node))
+     (partial-number-leaves (+ num (count-leaf (lson node)))
+                            (rson node))))))
+
+(define number-leaves
+  (lambda (node)
+    (partial-number-leaves 0 node)))
+
+;; test
+(number-leaves
+    (interior-node 'foo
+      (interior-node 'bar
+        (leaf 26)
+        (leaf 12))
+      (interior-node 'baz
+        (leaf 11)
+        (interior-node 'quux
+          (leaf 117)
+          (leaf 14)))))
+
 
