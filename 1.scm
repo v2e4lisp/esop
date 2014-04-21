@@ -268,8 +268,6 @@
                       (31 () ()))))
 
 ;; 1.35
-
-
 (define count-leaf
   (lambda (node)
     (if (leaf? node) 1
@@ -301,5 +299,26 @@
         (interior-node 'quux
           (leaf 117)
           (leaf 14)))))
+
+;; 36
+(define partial-g
+  (lambda (lst)
+    (if (null? lst) ()
+        (cons (list (inc (caar lst)) (cadar lst))
+              (partial-g (cdr lst))))))
+
+(define g
+  (lambda (lst1 lst2)
+    (cons lst1
+          (partial-g lst2))))
+
+(define number-elements
+    (lambda (lst)
+      (if (null? lst) ()
+          (g (list 0 (car lst)) (number-elements (cdr lst))))))
+
+;; test
+(partial-g '((1 a) (2 b) (3 c)))
+(number-elements '(a b c d e))
 
 
